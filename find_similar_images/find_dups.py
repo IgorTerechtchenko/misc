@@ -98,7 +98,7 @@ def main():
     if args.d:
         for group in result:
             for name in group[1:]:
-                os.popen("rm {}".format(name))
+                os.remove(str(name))
 
 
 if __name__ == "__main__":
