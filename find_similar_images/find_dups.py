@@ -55,7 +55,6 @@ def main():
     parser.add_argument("-l", help="list visually identical images",
                         action="store_true")
     parser.add_argument("-c", help="use C number of threads", type=int)
-    parser.add_argument("-dev", action="store_true")
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -68,10 +67,6 @@ def main():
         threads_count = 4
 
     pic_names = os.listdir(".")
-
-    if args.dev:
-        print create_img(pic_names[3])
-        sys.exit()
 
     images = []
     pool = Pool(threads_count)
