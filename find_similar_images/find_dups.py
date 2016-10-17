@@ -29,6 +29,9 @@ class ImageComp:
     def __hash__(self):
         return hash(self.hash)
 
+    def precise(self):
+        self.hash = os.popen("identify -verbose {} | grep signature").format(self.name)
+
 
 def create_img(image_name):
     try:
@@ -53,6 +56,8 @@ def main():
                         leaving ones with the alphabeticaly greatest name""",
                         action="store_true")
     parser.add_argument("-l", help="list visually identical images",
+                        action="store_true")
+    parser.add_argument("-p", help="use external imagemagick call for more precise results",
                         action="store_true")
     parser.add_argument("-c", help="use C number of threads", type=int)
     args = parser.parse_args()
@@ -84,10 +89,17 @@ def main():
 
     result = list(set(result))
 
+    if args.p:
+        for image in result:
+            image.precise()
+        result = filter(lambda x: len(x) > 1, result)
+        result = list(set(result))
+
     if args.l:
         for i in result:
             for item in i:
                 print item
+                print item.hash
             print
 
     if args.d:
