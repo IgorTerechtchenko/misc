@@ -4,6 +4,7 @@
 import os
 import argparse
 import sys
+import itertools
 from multiprocessing import Pool
 from PIL import Image, ImageFile
 
@@ -30,7 +31,8 @@ class ImageComp:
         return hash(self.hash)
 
     def precise(self):
-        self.hash = os.popen("identify -verbose {} | grep signature").format(self.name)
+        self.hash = os.popen("identify -verbose {} | grep signature".format(self.name)).readline()
+        self.hash = self.hash.split()[1]
 
 
 def create_img(image_name):
@@ -90,14 +92,18 @@ def main():
     result = list(set(result))
 
     if args.p:
-        for image in result:
+        tmp = list(itertools.chain(*result))
+        result = []
+        for image in tmp:
             image.precise()
+        for image in tmp:
+            result.append(tuple(filter(lambda i: image == i, images)))
         result = filter(lambda x: len(x) > 1, result)
         result = list(set(result))
 
     if args.l:
-        for i in result:
-            for item in i:
+        for group in result:
+            for item in group:
                 print item
                 print item.hash
             print
