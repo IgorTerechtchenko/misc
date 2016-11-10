@@ -1,0 +1,35 @@
+#!/usr/bin/python2.7
+
+
+import sys
+import urllib
+from bs4 import BeautifulSoup
+import re
+
+
+def main():
+    response = urllib.urlopen(sys.argv[1])
+    target_dir = sys.argv[2]
+    name_search_pattern = "/src/.+/(?P<filename>.+[.].+)"
+    url_search_pattern = r"(https:\/\/.+[.].+\/.+)res"
+    urlpart = re.search(url_search_pattern, sys.argv[1]).group(1)
+    html = response.read()
+    soup = BeautifulSoup(html)
+    pictags = soup.find_all("a")
+
+    pictags = filter(lambda tag: "class" in tag.attrs, pictags)
+    pictags = filter(lambda tag: tag.attrs["class"] == ["desktop"], pictags)
+
+    url_parts = []
+    for tag in pictags:
+        url_parts.append(tag["href"])
+
+    i = 0
+    for url in url_parts:
+        i = i + 1
+        name = re.search(name_search_pattern, url).group("filename")
+        print name + " {}\\{}".format(i, len(url_parts))
+        urllib.urlretrieve(urlpart + url[2::], target_dir + "/" + name)
+
+if __name__ == "__main__":
+    main()
