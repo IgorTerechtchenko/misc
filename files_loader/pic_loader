@@ -5,16 +5,24 @@ import sys
 import urllib
 from bs4 import BeautifulSoup
 import re
+import os
+import datetime
 
 
 def main():
     response = urllib.urlopen(sys.argv[1])
-    target_dir = sys.argv[2]
+    try:
+        target_dir = sys.argv[2]
+    except IndexError:
+        print "no directory provided"
+        target_dir = os.path.expanduser("~") + "/Pictures/{}".format(str(datetime.datetime.now()))
+        os.mkdir(target_dir)
+        print "using {}".format(target_dir)
     name_search_pattern = "/src/.+/(?P<filename>.+[.].+)"
     url_search_pattern = r"(https:\/\/.+[.].+\/.+)res"
     urlpart = re.search(url_search_pattern, sys.argv[1]).group(1)
     html = response.read()
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
     pictags = soup.find_all("a")
 
     pictags = filter(lambda tag: "class" in tag.attrs, pictags)
